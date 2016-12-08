@@ -11,13 +11,44 @@ package ie.gmit.sw;
  */
 public class CompareCall { // step 2
     
-    private long jobNumber;
+    private String jobNumber;
     private String a;
     private String b;
+    private String algorithm;
     
-    public CompareCall(long jobNumber, String a, String b){
+    public CompareCall(String jobNumber, String a, String b, String algorithm){
         this.jobNumber = jobNumber;
         this.a = a;
         this.b = b;
+        this.algorithm = algorithm;
     }
+
+    /**
+     * @return the jobNumber
+     */
+    public String getJobNumber() {
+        return jobNumber;
+    }
+
+    /**
+     * @return the a
+     */
+    public String getA() {
+        return a;
+    }
+
+    /**
+     * @return the b
+     */
+    public String getB() {
+        return b;
+    }
+
+    /**
+     * @return the algorithm
+     */
+    public String getAlgorithm() {
+        return algorithm;
+    }
+    
 }

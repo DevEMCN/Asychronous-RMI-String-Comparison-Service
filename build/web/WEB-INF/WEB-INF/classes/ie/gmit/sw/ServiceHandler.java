@@ -1,23 +1,25 @@
 package ie.gmit.sw;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
 public class ServiceHandler extends HttpServlet {
 	private String remoteHost = null;
 	private static long jobNumber = 0; // step 1
+        private ServiceManager serviceManager; // step 5
+        private Thread serviceMgrThread;
         
-        // step 3
-        private BlockingQueue<CompareCall> inQueue = new ArrayBlockingQueue<CompareCall>(10);
-        private HashMap<String, Resultator> outQueue = new HashMap<String, Resultator>();
 
 	public void init() throws ServletException {
 		ServletContext ctx = getServletContext();
 		remoteHost = ctx.getInitParameter("RMI_SERVER"); //Reads the value from the <context-param> in web.xml
+                serviceManager = new ServiceManager();
+                serviceMgrThread = new Thread(serviceManager);
+                serviceMgrThread.start();
+                
 	}
 
 	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -39,17 +41,30 @@ public class ServiceHandler extends HttpServlet {
 			taskNumber = new String("T" + jobNumber);
 			jobNumber++;
 			//Add job to in-queue
-                        CompareCall cc = new CompareCall(jobNumber, s, t); // step 3
-                        inQueue.add(cc); // step 3
-                        outQueue.put(taskNumber, null); // resultator has not being created yet so putting in null for now
+                        CompareCall cc = new CompareCall(taskNumber, s, t, algorithm); // step 3
+                        
+                        serviceManager.newJob(cc);
+                        
+                        //outQueue.put(taskNumber, null); // resultator has not being created yet so putting in null for now
                         
 		}else{
-			//Check out-queue for finished job
+                    //try {
+                        //Check out-queue for finished job
+                        if(serviceManager.getJob(taskNumber) != null && serviceManager.isComplete(taskNumber)){
+                            out.print("Result of Comparison: " + serviceManager.getJob(taskNumber));
+                        }
+                        else {
+                            out.print("Waiting");
+                        }
+                    //} catch (Exception ex) {
+                    //    Logger.getLogger(ServiceHandler.class.getName()).log(Level.SEVERE, null, ex);
+                   // }
+                            
 		}
 		
 		
 		
-		out.print("<H1>Processing request for Job#: " + taskNumber + "</H1>");
+		out.print("<H1>Processing request for Job#: " + taskNumber + "</H1>"); // step 4
 		out.print("<div id=\"r\"></div>");
 		
 		out.print("<font color=\"#993333\"><b>");
@@ -57,28 +72,27 @@ public class ServiceHandler extends HttpServlet {
 		out.print("<br>Algorithm: " + algorithm);		
 		out.print("<br>String <i>s</i> : " + s);
 		out.print("<br>String <i>t</i> : " + t);
-		out.print("<br>This servlet should only be responsible for handling client request and returning responses. Everything else should be handled by different objects.");
-		out.print("Note that any variables declared inside this doGet() method are thread safe. Anything defined at a class level is shared between HTTP requests.");				
-		out.print("</b></font>");
+//		out.print("<br>This servlet should only be responsible for handling client request and returning responses. Everything else should be handled by different objects.");
+//		out.print("Note that any variables declared inside this doGet() method are thread safe. Anything defined at a class level is shared between HTTP requests.");				
+//		out.print("</b></font>");
 
-		out.print("<P> Next Steps:");	
-		out.print("<OL>");
-		out.print("<LI>Generate a big random number to use a a job number, or just increment a static long variable declared at a class level, e.g. jobNumber.");	
-		out.print("<LI>Create some type of an object from the request variables and jobNumber.");	
-		out.print("<LI>Add the message request object to a LinkedList or BlockingQueue (the IN-queue)");			
-		out.print("<LI>Return the jobNumber to the client web browser with a wait interval using <meta http-equiv=\"refresh\" content=\"10\">. The content=\"10\" will wait for 10s.");	
-		out.print("<LI>Have some process check the LinkedList or BlockingQueue for message requests.");	
-		out.print("<LI>Poll a message request from the front of the queue and make an RMI call to the String Comparison Service.");			
-		out.print("<LI>Get the <i>Resultator</i> (a stub that is returned IMMEDIATELY by the remote method) and add it to a Map (the OUT-queue) using the jobNumber as the key and the <i>Resultator</i> as a value.");	
-		out.print("<LI>Return the result of the string comparison to the client next time a request for the jobNumber is received and the <i>Resultator</i> returns true for the method <i>isComplete().</i>");	
-		out.print("</OL>");	
+//		out.print("<P> Next Steps:");	
+//		out.print("<OL>");
+//		out.print("<LI>Generate a big random number to use a a job number, or just increment a static long variable declared at a class level, e.g. jobNumber.");	
+//		out.print("<LI>Create some type of an object from the request variables and jobNumber.");	
+//		out.print("<LI>Add the message request object to a LinkedList or BlockingQueue (the IN-queue)");			
+//		out.print("<LI>Return the jobNumber to the client web browser with a wait interval using <meta http-equiv=\"refresh\" content=\"10\">. The content=\"10\" will wait for 10s.");	
+//		out.print("<LI>Have some process check the LinkedList or BlockingQueue for message requests.");	
+//		out.print("<LI>Poll a message request from the front of the queue and make an RMI call to the String Comparison Service.");			
+//		out.print("<LI>Get the <i>Resultator</i> (a stub that is returned IMMEDIATELY by the remote method) and add it to a Map (the OUT-queue) using the jobNumber as the key and the <i>Resultator</i> as a value.");	
+//		out.print("<LI>Return the result of the string comparison to the client next time a request for the jobNumber is received and the <i>Resultator</i> returns true for the method <i>isComplete().</i>");	
+//		out.print("</OL>");	
 		
 		out.print("<form name=\"frmRequestDetails\">");
 		out.print("<input name=\"cmbAlgorithm\" type=\"hidden\" value=\"" + algorithm + "\">");
 		out.print("<input name=\"txtS\" type=\"hidden\" value=\"" + s + "\">");
 		out.print("<input name=\"txtT\" type=\"hidden\" value=\"" + t + "\">");
 		out.print("<input name=\"frmTaskNumber\" type=\"hidden\" value=\"" + taskNumber + "\">");
-                out.print("<h1> TODO </h1>");
 		out.print("</form>");								
 		out.print("</body>");	
 		out.print("</html>");	
