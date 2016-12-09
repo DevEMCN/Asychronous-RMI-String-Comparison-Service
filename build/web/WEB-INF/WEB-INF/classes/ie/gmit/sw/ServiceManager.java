@@ -21,7 +21,7 @@ import java.util.logging.Logger;
  */
 public class ServiceManager implements Runnable{ // this is the client class for step 5
     
-    private BlockingQueue<CompareCall> inQueue;
+    private BlockingQueue<Task> inQueue;
     private HashMap<String, Resultator> outQueue;
 
     public ServiceManager(){
@@ -29,7 +29,7 @@ public class ServiceManager implements Runnable{ // this is the client class for
         outQueue = new HashMap<>();
     }
     
-    public void newJob(CompareCall cc){
+    public void newJob(Task cc){
        inQueue.add(cc);
     }
     
@@ -43,7 +43,7 @@ public class ServiceManager implements Runnable{ // this is the client class for
         return outQueue.get(taskNumber).isProcessed();
     }
     
-    public Resultator getResult(CompareCall cc) throws RemoteException{
+    public Resultator getResult(Task cc) throws RemoteException{ // step 6
         StringService ss = null;
         try {
             ss = (StringService) Naming.lookup("rmi://localhost:1099/comparator-service");
@@ -60,19 +60,16 @@ public class ServiceManager implements Runnable{ // this is the client class for
         
         try {
             
-            //StringService ss = (StringService) Naming.lookup("rmi://localhost:1099/comparator-service");
-            
             while(true) // endless loop 
             {
                 
-                CompareCall cc = inQueue.poll(); // step 6
+                Task cc = inQueue.poll(); // step 6
                 if(cc != null){
                         
-                if(/*resultator.*/this.getResult(cc) != null){
+                if(this.getResult(cc) != null){ // step 7
                     outQueue.put(cc.getJobNumber(), this.getResult(cc));
                 }
                 }
-
             }
         } catch(RemoteException ex){
         }

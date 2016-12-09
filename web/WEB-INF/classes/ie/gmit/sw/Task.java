@@ -9,14 +9,14 @@ package ie.gmit.sw;
  *
  * @author eamon
  */
-public class CompareCall { // step 2
+public class Task { // step 2
     
     private String jobNumber;
     private String a;
     private String b;
     private String algorithm;
     
-    public CompareCall(String jobNumber, String a, String b, String algorithm){
+    public Task(String jobNumber, String a, String b, String algorithm){
         this.jobNumber = jobNumber;
         this.a = a;
         this.b = b;

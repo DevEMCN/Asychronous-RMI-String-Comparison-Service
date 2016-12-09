@@ -1,8 +1,6 @@
 package ie.gmit.sw;
 
 import java.io.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
@@ -10,15 +8,15 @@ public class ServiceHandler extends HttpServlet {
 	private String remoteHost = null;
 	private static long jobNumber = 0; // step 1
         private ServiceManager serviceManager; // step 5
-        private Thread serviceMgrThread;
+        private Thread serviceMgrThread; // step 5
         
 
 	public void init() throws ServletException {
 		ServletContext ctx = getServletContext();
 		remoteHost = ctx.getInitParameter("RMI_SERVER"); //Reads the value from the <context-param> in web.xml
                 serviceManager = new ServiceManager();
-                serviceMgrThread = new Thread(serviceManager);
-                serviceMgrThread.start();
+                serviceMgrThread = new Thread(serviceManager); // step 5
+                serviceMgrThread.start(); // step 5
                 
 	}
 
@@ -41,37 +39,51 @@ public class ServiceHandler extends HttpServlet {
 			taskNumber = new String("T" + jobNumber);
 			jobNumber++;
 			//Add job to in-queue
-                        CompareCall cc = new CompareCall(taskNumber, s, t, algorithm); // step 3
+                        Task cc = new Task(taskNumber, s, t, algorithm); // step 3
                         
-                        serviceManager.newJob(cc);
+                        serviceManager.newJob(cc); // step 4
                         
-                        //outQueue.put(taskNumber, null); // resultator has not being created yet so putting in null for now
-                        
+                        out.print("<H1>Processing request for Job#: " + taskNumber + "</H1>"); // step 4
+                        out.print("<div id=\"r\"></div>");
+		
+                        out.print("<font color=\"#993333\"><b>");
+                        out.print("RMI Server is located at " + remoteHost);
+                        out.print("<br>Algorithm: " + algorithm);		
+                        out.print("<br>String <i>s</i> : " + s);
+                        out.print("<br>String <i>t</i> : " + t);
+                        out.print("<br/>");
+                        out.print("<br/>");
+                        out.print("<b>Please wait...");
+                         
 		}else{
-                    //try {
-                        //Check out-queue for finished job
+                        
+                        //Check out-queue for finished job (step 8)
                         if(serviceManager.getJob(taskNumber) != null && serviceManager.isComplete(taskNumber)){
+                            out.print("<H1>Processed request for Job#: " + taskNumber + "</H1>"); // step 4
+                            out.print("<div id=\"r\"></div>");
+
+                            out.print("<font color=\"#993333\"><b>");
+                            out.print("RMI Server is located at " + remoteHost);
+                            out.print("<br>Algorithm: " + algorithm);		
+                            out.print("<br>String <i>s</i> : " + s);
+                            out.print("<br>String <i>t</i> : " + t);
+                            out.print("<br/>");
+                            out.print("<br/>");
                             out.print("Result of Comparison: " + serviceManager.getJob(taskNumber));
                         }
-                        else {
-                            out.print("Waiting");
-                        }
-                    //} catch (Exception ex) {
-                    //    Logger.getLogger(ServiceHandler.class.getName()).log(Level.SEVERE, null, ex);
-                   // }
-                            
+                        
 		}
 		
 		
 		
-		out.print("<H1>Processing request for Job#: " + taskNumber + "</H1>"); // step 4
-		out.print("<div id=\"r\"></div>");
-		
-		out.print("<font color=\"#993333\"><b>");
-		out.print("RMI Server is located at " + remoteHost);
-		out.print("<br>Algorithm: " + algorithm);		
-		out.print("<br>String <i>s</i> : " + s);
-		out.print("<br>String <i>t</i> : " + t);
+//		out.print("<H1>Processing request for Job#: " + taskNumber + "</H1>"); // step 4
+//		out.print("<div id=\"r\"></div>");
+//		
+//		out.print("<font color=\"#993333\"><b>");
+//		out.print("RMI Server is located at " + remoteHost);
+//		out.print("<br>Algorithm: " + algorithm);		
+//		out.print("<br>String <i>s</i> : " + s);
+//		out.print("<br>String <i>t</i> : " + t);
 //		out.print("<br>This servlet should only be responsible for handling client request and returning responses. Everything else should be handled by different objects.");
 //		out.print("Note that any variables declared inside this doGet() method are thread safe. Anything defined at a class level is shared between HTTP requests.");				
 //		out.print("</b></font>");
