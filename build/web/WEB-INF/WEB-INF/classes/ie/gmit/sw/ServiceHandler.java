@@ -4,6 +4,17 @@ import java.io.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
+/* Steps 1 to 8
+  1. Generate a big random number to use a a job number, or just increment a static long variable declared at a class level, e.g. jobNumber.
+  2. Create some type of an object from the request variables and jobNumber.
+  3. Add the message request object to a LinkedList or BlockingQueue (the IN-queue).			
+  4. Return the jobNumber to the client web browser with a wait interval using <meta http-equiv=\"refresh\" content=\"10\">. The content=\"10\" will wait for 10s.	
+  5. Have some process check the LinkedList or BlockingQueue for message requests.
+  6. Poll a message request from the front of the queue and make an RMI call to the String Comparison Service.");			
+  7. Get the <i>Resultator</i> (a stub that is returned IMMEDIATELY by the remote method) and add it to a Map (the OUT-queue) using the jobNumber as the key and the <i>Resultator</i> as a value.	
+  8. Return the result of the string comparison to the client next time a request for the jobNumber is received and the <i>Resultator</i> returns true for the method <i>isComplete().
+*/
+
 public class ServiceHandler extends HttpServlet {
 	private String remoteHost = null;
 	private static long jobNumber = 0; // step 1
