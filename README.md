@@ -7,7 +7,7 @@
 
 #<a name="introduction"></a>Introduction
 Using the Java RMI framework to develop a remote, asynchronous string comparison service. A client should be able to remotely connect and pass two strings to the service for comparison. The service should use one of a number of optional string comparison algorithms to compute the edit distance or optimal alignment between the two strings. <br/>
-Too quickly see the application in use, download the quickfiles folder and follow the installation instruction further down.<br/>
+Too quickly see the application in use, download the Quickstart folder and follow the installation instruction further down.<br/>
 
 
 #<a name="installation"></a>Installation
